@@ -84,6 +84,101 @@ Details: [cost-optimization.md](docs/cost-optimization.md)
 - Prompt versioning
 - Streaming responses
 
+## High Level Architecture
+┌──────────────┐
+│ Data Sources │  (PDFs, Risk Docs, Policies)
+└──────┬───────┘
+       │
+       ▼
+┌────────────────────┐
+│ Databricks         │
+│ - Ingestion        │
+│ - Chunking         │
+│ - Metadata tagging │
+│ - Embeddings       │
+└──────┬─────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│ Vector Store             │
+│ (Azure AI Search /       │
+│  Databricks Vector)      │
+└──────┬──────────────────┘
+       │
+       ▼
+┌───────────────────┐
+│ RAG Orchestrator  │
+│ (Azure Function / │
+│  FastAPI App)     │
+│ - Query rewrite   │
+│ - Retrieval       │
+│ - Prompt assembly │
+└──────┬────────────┘
+       │
+       ▼
+┌───────────────────┐
+│ Azure OpenAI      │
+│ (GPT-4 / GPT-4o)  │
+└──────┬────────────┘
+       │
+       ▼
+┌───────────────────┐
+│ Response Layer    │
+│ - Citations       │
+│ - Safety filters  │
+│ - Cost logging    │
+└───────────────────┘
+
+
+## Project Structure (Proposed)
+enterprise-genai-rag-azure/
+│
+├── README.md
+│
+├── architecture/
+│   ├── architecture-diagram.png
+│   ├── design-decisions.md
+│   └── security-considerations.md
+│
+├── databricks/
+│   ├── ingestion/
+│   │   └── ingest_documents.py
+│   ├── chunking/
+│   │   └── smart_chunking.py
+│   ├── embeddings/
+│   │   └── generate_embeddings.py
+│   └── jobs/
+│       └── batch_embedding_job.json
+│
+├── vector-store/
+│   ├── azure-ai-search/
+│   │   └── index_definition.json
+│   └── queries/
+│       └── sample_queries.json
+│
+├── api/
+│   ├── main.py
+│   ├── rag_service.py
+│   ├── prompt_templates/
+│   │   └── enterprise_rag.txt
+│   └── auth/
+│       └── managed_identity.py
+│
+├── evaluation/
+│   ├── sample_questions.json
+│   ├── relevance_metrics.py
+│   └── hallucination_checks.md
+│
+├── infra/
+│   ├── bicep/
+│   └── terraform/
+│
+└── docs/
+    ├── cost-optimization.md
+    ├── scaling-strategy.md
+    └── future-enhancements.md
+
+
 ## Disclaimer
 This project is for **educational and portfolio purposes** and does not contain proprietary or confidential data.
 
